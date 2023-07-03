@@ -1,54 +1,32 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 using namespace std;
 using bit8 = unsigned char;
 using bit32 = unsigned int;
 
-bit32 lift32(bit32 input, char n)
-{
-    return (input << n) | (input >> (32 - n));
-}
+#define lift32(input, n) ((input << n) | (input >> (32 - n)))
 
-bit32 T(int j)
-{
-    if (j <= 15)
-        return 0x79cc4519;
-    else
-        return 0x7a879d8a;
-}
+#define T(j) (j <= 15 ? 0x79cc4519 : 0x7a879d8a)
 
-bit32 FF(bit32 X, bit32 Y, bit32 Z, int j)
-{
-    if (j <= 15)
-        return X ^ Y ^ Z;
-    else
-        return (X & Y) | (X & Z) | (Y & Z);
-}
+#define FF(X, Y, Z, j) (j <= 15 ? X ^ Y ^ Z : (X & Y) | (X & Z) | (Y & Z))
 
-bit32 GG(bit32 X, bit32 Y, bit32 Z, int j)
-{
-    if (j <= 15)
-        return X ^ Y ^ Z;
-    else
-        return (X & Y) | ((~X) & Z);
-}
+#define GG(X, Y, Z, j) (j <= 15 ? X ^ Y ^ Z : (X & Y) | ((~X) & Z))
 
-bit32 P0(bit32 X)
-{
-    return X ^ lift32(X, 9) ^ lift32(X, 17);
-}
+#define P0(X) (X ^ lift32(X, 9) ^ lift32(X, 17))
 
 bit32 P1(bit32 X)
 {
     return X ^ lift32(X, 15) ^ lift32(X, 23);
 }
 
+bit32 W[68]{};
+bit32 Wp[64]{};
+
 void CF(bit32 V[8], bit8 B[64], int i)
 {
-    bit32 W[68]{};
-    bit32 Wp[64]{};
     for (int j = 0; j < 16; j++)
     {
         swap(B[4 * j], B[4 * j + 3]);
@@ -58,8 +36,13 @@ void CF(bit32 V[8], bit8 B[64], int i)
     for (int j = 16; j <= 67; j++)
         W[j] = P1(W[j - 16] ^ W[j - 9] ^ lift32(W[j - 3], 15)) ^ lift32(W[j - 13], 7) ^ W[j - 6];
 
-    for (int j = 0; j < 64; j++)
+    for (int j = 0; j < 64; j += 4)
+    {
         Wp[j] = W[j] ^ W[j + 4];
+        Wp[j + 1] = W[j + 1] ^ W[j + 5];
+        Wp[j + 2] = W[j + 2] ^ W[j + 6];
+        Wp[j + 3] = W[j + 3] ^ W[j + 7];
+    }
 
     bit32 SS1 = 0, SS2 = 0, TT1 = 0, TT2 = 0;
     bit32 temp[8] = {V[0], V[1], V[2], V[3], V[4], V[5], V[6], V[7]};
@@ -77,18 +60,13 @@ void CF(bit32 V[8], bit8 B[64], int i)
         temp[6] = lift32(temp[5], 19);
         temp[5] = temp[4];
         temp[4] = P0(TT2);
-        bit8 *tempp = (bit8 *)temp;
     }
     for (int j = 0; j < 8; j++)
         V[j] = V[j] ^ temp[j];
-    for (int j = 0; j < 8; j++)
-        cout << hex << V[j] << "  ";
-    cout << endl;
 }
 
-void SM3(bit8 *mes)
+void SM3(bit8 *mes, bit32 V[8])
 {
-    bit32 V[8] = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e};
     size_t len = 8 * strlen((char *)mes);
     int k = (447 - len) % 512 >= 0 ? (447 - len) % 512 : (447 - len) % 512 + 512;
     const size_t total_len = (len + 65 + k) / 8;
@@ -106,7 +84,16 @@ void SM3(bit8 *mes)
 
 int main()
 {
+    bit32 V[8] = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e};
     bit8 mes[3] = {0x61, 0x62, 0x63};
-    SM3(mes);
+    clock_t a, b;
+    a = clock();
+    SM3(mes, V);
+    b = clock();
+    for (int i = 0; i < 8; i++)
+        cout << hex << V[i] << " ";
+    cout << endl;
+    cout << "\n"
+         << (double)(b - a) / CLOCKS_PER_SEC << " s" << endl;
     return 0;
 }
