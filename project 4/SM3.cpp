@@ -22,28 +22,9 @@ bit32 P1(bit32 X)
     return X ^ lift32(X, 15) ^ lift32(X, 23);
 }
 
-bit32 W[68]{};
-bit32 Wp[64]{};
-
-void CF(bit32 V[8], bit8 B[64], int i)
+// CF操作
+void CF(bit32 V[8], bit8 B[64], int i, bit32 *W, bit32 *Wp)
 {
-    for (int j = 0; j < 16; j++)
-    {
-        swap(B[4 * j], B[4 * j + 3]);
-        swap(B[4 * j + 1], B[4 * j + 2]);
-        W[j] = *(bit32 *)(&B[4 * j]);
-    }
-    for (int j = 16; j <= 67; j++)
-        W[j] = P1(W[j - 16] ^ W[j - 9] ^ lift32(W[j - 3], 15)) ^ lift32(W[j - 13], 7) ^ W[j - 6];
-
-    for (int j = 0; j < 64; j += 4)
-    {
-        Wp[j] = W[j] ^ W[j + 4];
-        Wp[j + 1] = W[j + 1] ^ W[j + 5];
-        Wp[j + 2] = W[j + 2] ^ W[j + 6];
-        Wp[j + 3] = W[j + 3] ^ W[j + 7];
-    }
-
     bit32 SS1 = 0, SS2 = 0, TT1 = 0, TT2 = 0;
     bit32 temp[8] = {V[0], V[1], V[2], V[3], V[4], V[5], V[6], V[7]};
     for (int j = 0; j <= 63; j++)
@@ -65,6 +46,7 @@ void CF(bit32 V[8], bit8 B[64], int i)
         V[j] = V[j] ^ temp[j];
 }
 
+/// SM3计算函数主体
 void SM3(bit8 *mes, bit32 V[8])
 {
     size_t len = 8 * strlen((char *)mes);
@@ -78,22 +60,59 @@ void SM3(bit8 *mes, bit32 V[8])
     swap(B[total_len - 7], B[total_len - 2]);
     swap(B[total_len - 6], B[total_len - 3]);
     swap(B[total_len - 5], B[total_len - 4]);
-    for (size_t i = 0; i < total_len / 64; i++)
-        CF(V, B + i * 64, i);
+    const size_t plen = total_len / 64;
+    bit32 W[plen][68]{};
+    bit32 Wp[plen][64]{};
+    for (size_t i = 0; i < plen; i++)
+    {
+        for (int j = 0; j < 16; j++)
+        {
+            swap((B + i * 64)[4 * j], (B + i * 64)[4 * j + 3]);
+            swap((B + i * 64)[4 * j + 1], (B + i * 64)[4 * j + 2]);
+            W[i][j] = *(bit32 *)(&(B + i * 64)[4 * j]);
+        }
+        for (int j = 16; j <= 67; j++)
+            W[i][j] = P1(W[i][j - 16] ^ W[i][j - 9] ^ lift32(W[i][j - 3], 15)) ^ lift32(W[i][j - 13], 7) ^ W[i][j - 6];
+
+        for (int j = 0; j < 64; j += 4)
+        {
+            Wp[i][j] = W[i][j] ^ W[i][j + 4];
+            Wp[i][j + 1] = W[i][j + 1] ^ W[i][j + 5];
+            Wp[i][j + 2] = W[i][j + 2] ^ W[i][j + 6];
+            Wp[i][j + 3] = W[i][j + 3] ^ W[i][j + 7];
+        }
+    }
+    for (size_t i = 0; i < plen; i++)
+        CF(V, B + i * 64, i, W[i], Wp[i]);
 }
 
+const size_t len = 10000;
 int main()
 {
+    // 初始V
     bit32 V[8] = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e};
+    // 测试案例mes，用来测试结果的正确性
     bit8 mes[3] = {0x61, 0x62, 0x63};
-    clock_t a, b;
-    a = clock();
+    // 测试案例test，用来测试效率
+    bit8 test[len];
+    for (int i = 0; i < len; i++)
+        test[i] = 100;
+
+    // 测试正确性
     SM3(mes, V);
-    b = clock();
     for (int i = 0; i < 8; i++)
         cout << hex << V[i] << " ";
     cout << endl;
+
+    // 测试效率
+    clock_t a, b;
+    a = clock();
+    SM3(test, V);
+    b = clock();
+
+    for (int i = 0; i < 8; i++)
+        cout << hex << V[i] << " ";
     cout << "\n"
-         << (double)(b - a) / CLOCKS_PER_SEC << " s" << endl;
+         << (double)(b - a) / CLOCKS_PER_SEC * 1000 << " ms" << endl;
     return 0;
 }
