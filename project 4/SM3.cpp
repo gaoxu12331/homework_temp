@@ -86,7 +86,9 @@ void SM3(bit8 *mes, bit32 V[8])
         CF(V, B + i * 64, i, W[i], Wp[i]);
 }
 
-const size_t len = 10000;
+// 测试文本长度
+const size_t len = 100000;
+
 int main()
 {
     // 初始V
@@ -94,7 +96,7 @@ int main()
     bit32 V2[8] = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e}; // 测试案例mes，用来测试结果的正确性
     // 测试案例mes，用来测试正确性
     bit8 mes[4] = {0x61, 0x62, 0x63, 0};
-    
+
     // 测试案例test，用来测试效率
     bit8 test[len];
     for (int i = 0; i < len; i++)
