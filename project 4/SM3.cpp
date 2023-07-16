@@ -90,28 +90,30 @@ const size_t len = 10000;
 int main()
 {
     // 初始V
-    bit32 V[8] = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e};
-    // 测试案例mes，用来测试结果的正确性
-    bit8 mes[3] = {0x61, 0x62, 0x63};
+    bit32 V1[8] = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e};
+    bit32 V2[8] = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e}; // 测试案例mes，用来测试结果的正确性
+    // 测试案例mes，用来测试正确性
+    bit8 mes[4] = {0x61, 0x62, 0x63, 0};
+    
     // 测试案例test，用来测试效率
     bit8 test[len];
     for (int i = 0; i < len; i++)
         test[i] = 100;
 
     // 测试正确性
-    SM3(mes, V);
+    SM3(mes, V1);
     for (int i = 0; i < 8; i++)
-        cout << hex << V[i] << " ";
+        cout << hex << V1[i] << " ";
     cout << endl;
 
     // 测试效率
     clock_t a, b;
     a = clock();
-    SM3(test, V);
+    SM3(test, V2);
     b = clock();
 
     for (int i = 0; i < 8; i++)
-        cout << hex << V[i] << " ";
+        cout << hex << V2[i] << " ";
     cout << "\n"
          << (double)(b - a) / CLOCKS_PER_SEC * 1000 << " ms" << endl;
     return 0;
