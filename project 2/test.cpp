@@ -1,12 +1,9 @@
-# Project2: implement the Rho method of reduced SM3
+#include "SM3.h"
+#include <ctime>
 
-选择迭代函数
-```  C
+// 迭代函数
 #define func(n) (n * n + 1)
-```
 
-主要程序内容描述：
-```  C
 int main()
 {
     clock_t s, t;
@@ -31,19 +28,3 @@ int main()
     cout << (double)(t - s) / (CLOCKS_PER_SEC) << " s" << endl;
     return 0;
 }
-``` 
-
-选择的攻击长度：20bit
-
-实验结果
-
-``` 
-Success!
-0x176c911
-0x5db2441
-0.016944 s
-```
-
-发现0x176c911和0x5db2441出现碰撞；
-
-可以发现：进行Rho攻击明显速度较快，有很好的攻击结果。
