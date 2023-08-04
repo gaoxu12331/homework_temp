@@ -1,8 +1,5 @@
-# SM3生日攻击
+#include "SM3.h"
 
-## 重要代码描述
-
-```  C
 int main()
 {
     size_t len = 15;
@@ -35,18 +32,3 @@ int main()
     cout << (double)(b - a) / (CLOCKS_PER_SEC) << " s" << endl;
     return 0;
 }
-
-```
-
-遍历长度为15bit，方法为直接遍历，进行生日攻击，发现可以快速得到碰撞。
-
-
-## 实验结果
-
-```
-
-Success!
-0x129
-0x315
-28.4605 s
-```
