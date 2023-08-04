@@ -1,5 +1,16 @@
 # Project2: implement the Rho method of reduced SM3
 
+## 运行环境
+
+操作系统：Ubuntu 22.04.2 LTS 64位
+
+编译环境：C++ 使用 g++ (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0，
+不使用编译优化
+
+硬件环境：11th Gen Intel® Core™ i5-1135G7 @ 2.40G   16.0 GiB
+
+---
+
 选择迭代函数
 ```  C
 #define func(n) (n * n + 1)
