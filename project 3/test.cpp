@@ -1,25 +1,5 @@
-# Project3: implement length extension attack for SM3, SHA256, etc.
-
-## 运行环境
-
-操作系统：Ubuntu 22.04.2 LTS 64位
-
-编译环境：C++ 使用 g++ (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0，
-不使用编译优化
-
-硬件环境：11th Gen Intel® Core™ i5-1135G7 @ 2.40G   16.0 GiB
-
----
-
-首先获得原本明文0xffffffff混淆的结果，然后根据SM3加密规范进行数据填充
-填充后的文本再塞入新的攻击文本，然后再根据SM3加密规范进行数据填充，最后
-实现SM3混淆；
-
-这样可以通过已知长度的密文，在未知密钥的情况下得到混入新内容的新混淆结果；
-
-主要代码：
-
-``` C
+#include "SM3.h"
+#include <random>
 int main()
 {
     // 设置原本明文0xffffffff，长度为32位；
@@ -79,11 +59,3 @@ int main()
     cout << endl;
     return 0;
 }
-
-```
-
-## 运行结果：
-
-```
-c27e474a 8014bed0 60249cfd a0370248 9754b720 4b6c63be 14818f94 95df8b9e 0 34120000 5289a500 8138777d 0 0 0 0 ffffde18 7fff 55555ee4 5555 55558d60 5555 f7ffd040 7fff 1 0 f7829d90 7fff 0 0 55555ee4 5555 0 1 ffffde18 7fff 0 0 ccc49cf3 bfa91378 ffffde18 7fff 55555ee4 5555 55558d60 5555 f7ffd040 7fff 76e69cf3 4056ec87 f64e9cf3 4056fc7d 0 0 0 0 0 0 ffff 1 0 0 5289a500 8138777d 
-```
